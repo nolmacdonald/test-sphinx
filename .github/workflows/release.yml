@@ -48,7 +48,12 @@ jobs:
               before_data = tomllib.loads(before_blob.stdout)
               before_version = before_data["project"].get("version", "")
 
-          changed = str(before_version != after_version).lower()
+          if before_version:
+              changed = str(before_version != after_version).lower()
+          else:
+              # No previous version found (e.g., first push, history rewrite, or pyproject.toml added later)
+              # Treat this as "no change" to avoid creating a tag/release spuriously.
+              changed = "false"
           tag = f"v{after_version}"
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
