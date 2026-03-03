@@ -103,7 +103,7 @@ jobs:
       - name: Install runtime + audit tooling
         run: |
           uv sync --frozen
-          uv tool install pip-audit
+          uv pip install pip-audit
 
       - name: Run pip-audit
-        run: uv tool run pip-audit
+        run: uv run pip-audit
