@@ -1,21 +1,19 @@
-name: Lint
-
-# Runs on every push and pull request to catch formatting, linting, and type
-# errors as early as possible.  Keeping this workflow separate from the test
-# runner means failures are immediately attributable to code-quality issues.
+name: CI Quality
 
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+
+permissions:
+  contents: read
 
 jobs:
   ruff:
-    name: Ruff – format & lint
+    name: Ruff (format + lint)
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout repository
@@ -25,26 +23,25 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          cache-dependency-glob: uv.lock
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dev dependencies
-        run: uv sync --extra dev
+        run: uv sync --frozen --extra dev
 
-      - name: Check formatting (ruff format)
+      - name: Check formatting
         run: uv run ruff format --check .
 
-      - name: Check linting (ruff check)
+      - name: Check linting
         run: uv run ruff check .
 
   ty:
-    name: ty – type check
+    name: Ty (type checking)
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout repository
@@ -54,23 +51,22 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          cache-dependency-glob: uv.lock
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dev dependencies
-        run: uv sync --extra dev
+        run: uv sync --frozen --extra dev
 
-      - name: Run ty type check
-        run: uv run ty check src/
+      - name: Run ty
+        run: uv run ty check src/ tests/
 
-  pre-commit:
-    name: pre-commit hooks
+  uv-lock:
+    name: Validate uv lockfile
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout repository
@@ -80,15 +76,34 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Validate lockfile
+        run: uv lock --check
+
+  security:
+    name: Security audit (pip-audit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Install dev dependencies
-        run: uv sync --extra dev
+      - name: Install runtime + audit tooling
+        run: |
+          uv sync --frozen
+          uv tool install pip-audit
 
-      - name: Run pre-commit on all files
-        run: uv run pre-commit run --all-files
-
+      - name: Run pip-audit
+        run: uv tool run pip-audit
