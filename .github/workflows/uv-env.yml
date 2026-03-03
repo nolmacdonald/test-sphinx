@@ -1,0 +1,43 @@
+name: UV Environment
+
+# Validates that the UV environment can be successfully resolved and synced
+# for every supported extras group.  Catches dependency-resolution failures
+# before they reach the test or lint workflows.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  uv-sync:
+    name: uv sync (${{ matrix.extra }}, Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+        extra: [dev, docs]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Sync environment (--extra ${{ matrix.extra }})
+        run: uv sync --extra ${{ matrix.extra }}
+
+      - name: Verify package is importable
+        run: uv run python -c "import ditto; print(ditto.__version__)"

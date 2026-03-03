@@ -17,6 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "pre-commit",
     "pytest",
     "pytest-cov",
     "ruff",
@@ -50,5 +51,5 @@ indent-style = "space"
 testpaths = ["tests"]
 addopts = "--cov=ditto --cov-report=term-missing"
 
-[tool.ty]
+[tool.ty.environment]
 python-version = "3.11"
