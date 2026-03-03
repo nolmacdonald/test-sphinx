@@ -17,6 +17,7 @@ The workflows live under ``.github/workflows/``:
 - ``docs.yml``: docs build checks for PRs and docs publishing to ``gh-pages``.
 - ``uv-env.yml``: dependency-resolution validation with UV extras and Python matrix.
 - ``release.yml``: automatic tagging + GitHub Release creation on version bump.
+- ``labels.yml``: repository label synchronization from a declarative manifest.
 
 All pull-request-driven workflows include PR lifecycle event types such as
 ``ready_for_review`` and ``converted_to_draft`` so checks still run when draft
@@ -115,6 +116,22 @@ How it works:
 
 Result: bumping version in ``pyproject.toml`` on ``main`` automatically creates
 matching GitHub release metadata.
+
+
+7) ``labels.yml`` (repository label management)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This workflow keeps repository labels in sync with ``.github/labels.yml``.
+
+How it works:
+
+- runs on manual dispatch, weekly schedule, or when label config changes on ``main``;
+- applies labels defined in the manifest using ``micnncim/action-label-syncer``;
+- uses ``prune: false`` so missing required labels are added/updated without
+  deleting extra labels you may have created manually.
+
+This gives a consistent issue/PR triage taxonomy without requiring manual setup
+for every new repository.
 
 Caching and performance
 -----------------------
