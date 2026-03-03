@@ -1,4 +1,8 @@
-name: CI
+name: Lint
+
+# Runs on every push and pull request to catch formatting, linting, and type
+# errors as early as possible.  Keeping this workflow separate from the test
+# runner means failures are immediately attributable to code-quality issues.
 
 on:
   push:
@@ -7,15 +11,11 @@ on:
     branches: [main, develop]
 
 jobs:
-  test:
-    name: Test (Python ${{ matrix.python-version }})
+  ruff:
+    name: Ruff – format & lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout repository
@@ -26,26 +26,69 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install dev dependencies
         run: uv sync --extra dev
 
-      - name: Run ruff format check
+      - name: Check formatting (ruff format)
         run: uv run ruff format --check .
 
-      - name: Run ruff lint
+      - name: Check linting (ruff check)
         run: uv run ruff check .
 
-      - name: Run pytest with coverage
-        run: uv run pytest --cov=ditto --cov-report=xml
+  ty:
+    name: ty – type check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v4
-        if: matrix.python-version == '3.11'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
-          files: ./coverage.xml
-          fail_ci_if_error: false
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dev dependencies
+        run: uv sync --extra dev
+
+      - name: Run ty type check
+        run: uv run ty check src/
+
+  pre-commit:
+    name: pre-commit hooks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dev dependencies
+        run: uv sync --extra dev
+
+      - name: Run pre-commit on all files
+        run: uv run pre-commit run --all-files
+
