@@ -31,4 +31,5 @@ type checking, testing, and documentation out of the box.
    getting_started
    api/index
    changelog
+   ci_workflows
    contributing
