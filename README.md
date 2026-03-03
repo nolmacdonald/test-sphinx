@@ -21,15 +21,18 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/astral-sh/ruff">
-    <img src="https://img.shields.io/badge/linting-ruff-46a2f1?logo=ruff&logoColor=white" alt="Ruff" />
-  </a>
-  <a href="https://www.sphinx-doc.org/">
-    <img src="https://img.shields.io/badge/docs-sphinx-0A507A?logo=sphinx&logoColor=white" alt="Sphinx Docs" />
-  </a>
-  <a href="https://hatch.pypa.io/latest/build/">
-    <img src="https://img.shields.io/badge/build-hatchling-4051b5" alt="Hatchling" />
-  </a>
+  <img
+    src="https://img.shields.io/badge/linting-ruff-46a2f1?logo=ruff&logoColor=white"
+    alt="Ruff"
+  />
+  <img
+    src="https://img.shields.io/badge/docs-sphinx-0A507A?logo=sphinx&logoColor=white"
+    alt="Sphinx Docs"
+  />
+  <img
+    src="https://img.shields.io/badge/build-hatchling-4051b5"
+    alt="Hatchling"
+  />
 </p>
 
 
